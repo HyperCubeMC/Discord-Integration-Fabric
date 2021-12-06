@@ -1,5 +1,6 @@
 package de.erdbeerbaerlp.dcintegration.fabric;
 
+import com.mojang.brigadier.CommandDispatcher;
 import de.erdbeerbaerlp.dcintegration.common.Discord;
 import de.erdbeerbaerlp.dcintegration.common.storage.CommandRegistry;
 import de.erdbeerbaerlp.dcintegration.common.storage.Configuration;
@@ -21,6 +22,7 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.Role;
 import net.fabricmc.api.DedicatedServerModInitializer;
+import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.entity.damage.DamageSource;
@@ -63,6 +65,7 @@ public class DiscordIntegration implements DedicatedServerModInitializer {
                 ServerLifecycleEvents.SERVER_STARTED.register(this::serverStarted);
                 ServerLifecycleEvents.SERVER_STOPPED.register(this::serverStopped);
                 ServerLifecycleEvents.SERVER_STOPPING.register(this::serverStopping);
+                CommandRegistrationCallback.EVENT.register(this::registerCommands);
                 PlayerJoinCallback.EVENT.register(this::playerJoined);
                 PlayerLeaveCallback.EVENT.register(this::playerLeft);
                 PlayerDeathCallback.EVENT.register(this::death);
@@ -81,6 +84,10 @@ public class DiscordIntegration implements DedicatedServerModInitializer {
             System.err.println("\nStacktrace: ");
             e.printStackTrace();
         }
+    }
+
+    private void registerCommands(CommandDispatcher<ServerCommandSource> dispatcher, boolean dedicated) {
+        new McCommandDiscord(dispatcher);
     }
 
     private void command(String s, ServerCommandSource serverCommandSource) {
@@ -172,7 +179,6 @@ public class DiscordIntegration implements DedicatedServerModInitializer {
             }
         } catch (InterruptedException | NullPointerException ignored) {
         }
-        new McCommandDiscord(minecraftServer.getCommandManager().getDispatcher());
     }
 
     private void serverStarted(MinecraftServer minecraftServer) {
