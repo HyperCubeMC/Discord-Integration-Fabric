@@ -9,6 +9,7 @@ import de.erdbeerbaerlp.dcintegration.common.util.MessageUtils;
 import de.erdbeerbaerlp.dcintegration.common.util.UpdateChecker;
 import de.erdbeerbaerlp.dcintegration.common.util.Variables;
 import de.erdbeerbaerlp.dcintegration.fabric.command.McCommandDiscord;
+import de.erdbeerbaerlp.dcintegration.fabric.compat.KiloEssentialsCompat;
 import de.erdbeerbaerlp.dcintegration.fabric.util.FabricMessageUtils;
 import de.erdbeerbaerlp.dcintegration.fabric.util.FabricServerInterface;
 import me.bymartrixx.playerevents.api.event.CommandExecutionCallback;
@@ -21,6 +22,7 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.Role;
 import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.ServerCommandSource;
@@ -65,6 +67,9 @@ public class DiscordIntegration implements DedicatedServerModInitializer {
                 PlayerLeaveCallback.EVENT.register(this::playerLeft);
                 PlayerDeathCallback.EVENT.register(this::death);
                 CommandExecutionCallback.EVENT.register(this::command);
+                if (FabricLoader.getInstance().isModLoaded("kilo_essentials")) {
+                    KiloEssentialsCompat.registerCompatHook();
+                }
             } else {
                 System.err.println("Please check the config file and set an bot token");
             }

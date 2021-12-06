@@ -17,6 +17,9 @@ repositories {
     maven {
         url 'https://maven.bymartrixx.me'
     }
+    flatDir {
+        dirs "libs"
+    }
 }
 task release{
 
@@ -36,6 +39,8 @@ dependencies {
     // =========  Common  =====================
     modImplementation include('de.erdbeerbaerlp:DiscordIntegration-Core:ce44c82e')
 
+    // KiloEssentials
+    modImplementation name: "kilo_essentials-1.20.4-ModernTimes-1.18-pre5"
 }
 
 
