@@ -72,7 +72,7 @@ public class DiscordIntegration implements DedicatedServerModInitializer {
                 PlayerLeaveCallback.EVENT.register(this::playerLeft);
                 PlayerDeathCallback.EVENT.register(this::death);
                 CommandExecutionCallback.EVENT.register(this::command);
-                if (FabricLoader.getInstance().isModLoaded("kilo_essentials")) {
+                if (CompatibilityUtils.kiloEssentialsLoaded()) {
                     KiloEssentialsCompat.registerCompatHook();
                 }
                 if (CompatibilityUtils.styledChatLoaded()) {
