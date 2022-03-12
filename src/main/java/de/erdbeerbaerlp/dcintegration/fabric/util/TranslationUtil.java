@@ -56,7 +56,7 @@ public class TranslationUtil {
         if (assetsPath.isPresent()) {
             try {
                 lang_dirs = findLangDirs(assetsPath.get());
-                DiscordIntegration.LOGGER.info("{}: Found {} lang directories to check", modid, lang_dirs.size());
+                DiscordIntegration.LOGGER.debug("{}: Found {} lang directories to check", modid, lang_dirs.size());
             } catch (IOException e) {
                 DiscordIntegration.LOGGER.warn("{}: Error scanning lang directories", modid);
                 return translations;
@@ -70,7 +70,7 @@ public class TranslationUtil {
 
                     try {
                         inputStream = Files.newInputStream(lang_path);
-                        DiscordIntegration.LOGGER.info("{}: Found {} translations ({})", modid, lang, container.getRootPath().relativize(lang_path));
+                        DiscordIntegration.LOGGER.debug("{}: Found {} translations ({})", modid, lang, container.getRootPaths().get(0).relativize(lang_path));
                         break;
                     } catch (IOException e) {
                         if (!(e instanceof NoSuchFileException)) {
@@ -95,7 +95,7 @@ public class TranslationUtil {
         if (translations.size() > 0) {
             DiscordIntegration.LOGGER.info("{}: Successfully loaded {} translations", modid, translations.size());
         } else {
-            DiscordIntegration.LOGGER.warn("{}: Did not load any translations", modid);
+            DiscordIntegration.LOGGER.debug("{}: Did not load any translations", modid);
         }
 
         return translations;
