@@ -5,9 +5,11 @@
   "plugin": "de.erdbeerbaerlp.dcintegration.fabric.mixin.MixinConfig",
   "compatibilityLevel": "JAVA_17",
   "server": [
+    "MixinAdvancement",
+    "MixinLanguage",
     "MixinNetworkHandler",
-    "MixinWhitelist",
-    "MixinAdvancement"
+    "MixinTranslatableText",
+    "MixinWhitelist"
   ],
   "injectors": {
     "defaultRequire": 1
