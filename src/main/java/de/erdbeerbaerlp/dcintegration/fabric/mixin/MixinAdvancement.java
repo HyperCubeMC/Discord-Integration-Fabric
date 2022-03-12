@@ -18,7 +18,7 @@ import static de.erdbeerbaerlp.dcintegration.common.util.Variables.discord_insta
 @Mixin(PlayerAdvancementTracker.class)
 public class MixinAdvancement {
     @Shadow
-    ServerPlayerEntity owner;
+    private ServerPlayerEntity owner;
 
     @Inject(method = "grantCriterion", at = @At(value = "INVOKE", target = "Lnet/minecraft/advancement/PlayerAdvancementTracker;updateDisplay(Lnet/minecraft/advancement/Advancement;)V"))
     public void advancement(Advancement advancement, String criterionName, CallbackInfoReturnable<Boolean> cir){
