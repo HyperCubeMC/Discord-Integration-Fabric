@@ -211,7 +211,7 @@ public class DiscordIntegration implements DedicatedServerModInitializer {
                 else break;
             }
             if (discord_instance.getJDA() != null) {
-                Thread.sleep(3000); //Wait for it to cache the channels
+                discord_instance.getJDA().awaitReady();
                 if (!Configuration.instance().localization.serverStarting.isEmpty()) {
                     CommandRegistry.registerDefaultCommandsFromConfig();
                     if (discord_instance.getChannel() != null)
