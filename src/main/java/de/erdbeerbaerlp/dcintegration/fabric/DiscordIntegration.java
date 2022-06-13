@@ -39,6 +39,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
@@ -136,7 +137,8 @@ public class DiscordIntegration implements DedicatedServerModInitializer {
             discord_instance.sendMessage(Configuration.instance().localization.playerLeave.replace("%player%", FabricMessageUtils.formatPlayerName(p)));
         else if (discord_instance != null && timeouts.contains(p.getUuid())) {
             discord_instance.sendMessage(Configuration.instance().localization.playerTimeout.replace("%player%", FabricMessageUtils.formatPlayerName(p)));
-            timeouts.remove(p.getUuid());
+            //Fix for buggy timeouts causing leftovers in the timeout list
+            timeouts.removeIf(uuid -> uuid.equals(p.getUuid()));
         }
     }
 
