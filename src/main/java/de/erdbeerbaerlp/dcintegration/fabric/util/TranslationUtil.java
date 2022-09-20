@@ -2,13 +2,10 @@ package de.erdbeerbaerlp.dcintegration.fabric.util;
 
 import com.google.common.collect.ImmutableMap;
 import de.erdbeerbaerlp.dcintegration.fabric.DiscordIntegration;
-import de.erdbeerbaerlp.dcintegration.fabric.mixin.MixinTranslatableText;
+import de.erdbeerbaerlp.dcintegration.fabric.mixin.TranslatableTextContentMixin;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
-import net.minecraft.text.LiteralText;
-import net.minecraft.text.StringVisitable;
-import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.text.*;
 import net.minecraft.util.Language;
 import org.apache.logging.log4j.core.util.Closer;
 
@@ -124,22 +121,24 @@ public class TranslationUtil {
         return ImmutableMap.copyOf(translations);
     }
 
-    public static LiteralText translate(TranslatableText translatableText) {
-        ((MixinTranslatableText) translatableText).translationutil$updateTranslations();
-        LiteralText literalText = new LiteralText("");
+    public static Text translate(Text translatableText) {
+        if (!(translatableText.getContent() instanceof TranslatableTextContent)) throw new IllegalArgumentException("translatableText contents must be of type TranslatableTextContent");
+
+        ((TranslatableTextContentMixin) translatableText.getContent()).translationutil$updateTranslations();
+        MutableText literalText = Text.literal("");
         literalText.setStyle(translatableText.getStyle());
 
-        List<StringVisitable> translations = ((MixinTranslatableText) translatableText).translationutil$getTranslations();
+        List<StringVisitable> translations = ((TranslatableTextContentMixin) translatableText.getContent()).translationutil$getTranslations();
         for (StringVisitable translation : translations) {
             Text text = translation instanceof Text
-                    ? ((Text) translation).shallowCopy()
-                    : new LiteralText(translation.getString());
+                    ? ((Text) translation).copy()
+                    : Text.literal(translation.getString());
 
             literalText.append(text);
         }
 
         for (Text sibling : translatableText.getSiblings()) {
-            literalText.append(sibling.shallowCopy());
+            literalText.append(sibling.copy());
         }
 
         return literalText;

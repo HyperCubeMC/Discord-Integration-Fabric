@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 
 // Adapted from https://github.com/LoganDark/fabric-languagehack/blob/master/src/main/java/net/logandark/languagehack/mixin/MixinLanguage.java under MIT
 @Mixin(Language.class)
-public abstract class MixinLanguage {
+public abstract class LanguageMixin {
     @Redirect(
             method = "create",
             at = @At(

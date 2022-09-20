@@ -8,6 +8,7 @@ import dcshadow.net.kyori.adventure.text.Component;
 import dcshadow.net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import de.erdbeerbaerlp.dcintegration.common.DiscordEventListener;
 import de.erdbeerbaerlp.dcintegration.common.storage.Configuration;
+import de.erdbeerbaerlp.dcintegration.common.storage.Localization;
 import de.erdbeerbaerlp.dcintegration.common.storage.PlayerLinkController;
 import de.erdbeerbaerlp.dcintegration.common.util.ComponentUtils;
 import de.erdbeerbaerlp.dcintegration.common.util.MessageUtils;
@@ -16,24 +17,25 @@ import de.erdbeerbaerlp.dcintegration.common.util.Variables;
 import de.erdbeerbaerlp.dcintegration.fabric.command.DCCommandSender;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageReaction;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.emoji.EmojiUnion;
 import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.requests.RestAction;
 import net.minecraft.command.argument.TextArgumentType;
-import net.minecraft.network.MessageType;
 import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
-import net.minecraft.util.Util;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-public class FabricServerInterface extends ServerInterface {
+public class FabricServerInterface implements ServerInterface {
     private final MinecraftServer server;
 
     public FabricServerInterface(MinecraftServer minecraftServer) {
@@ -63,7 +65,7 @@ public class FabricServerInterface extends ServerInterface {
                     p.sendMessage(comp, false);
                     if (ping.getKey()) {
                         if (PlayerLinkController.getSettings(null, p.getUuid()).pingSound) {
-                            p.networkHandler.connection.send(new PlaySoundS2CPacket(SoundEvents.BLOCK_NOTE_BLOCK_PLING, SoundCategory.MASTER, p.getPos().x,p.getPos().y,p.getPos().z, 1, 1));
+                            p.networkHandler.connection.send(new PlaySoundS2CPacket(SoundEvents.BLOCK_NOTE_BLOCK_PLING, SoundCategory.MASTER, p.getPos().x,p.getPos().y,p.getPos().z, 1, 1, server.getOverworld().getSeed()));
                         }
                     }
                 }
@@ -71,24 +73,24 @@ public class FabricServerInterface extends ServerInterface {
             //Send to server console too
             final String jsonComp = GsonComponentSerializer.gson().serialize(msg).replace("\\\\n", "\n");
             final Text comp = TextArgumentType.text().parse(new StringReader(jsonComp));
-            server.sendSystemMessage(comp, Util.NIL_UUID);
+            server.sendMessage(comp);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     @Override
-    public void sendMCReaction(Member member, RestAction<Message> retrieveMessage, UUID targetUUID, MessageReaction.ReactionEmote reactionEmote) {
+    public void sendMCReaction(Member member, RestAction<Message> retrieveMessage, UUID targetUUID, EmojiUnion reactionEmote) {
         final List<ServerPlayerEntity> l = server.getPlayerManager().getPlayerList();
         for (final ServerPlayerEntity p : l) {
             if (p.getUuid().equals(targetUUID) && !Variables.discord_instance.ignoringPlayers.contains(p.getUuid()) && !PlayerLinkController.getSettings(null, p.getUuid()).ignoreDiscordChatIngame && !PlayerLinkController.getSettings(null, p.getUuid()).ignoreReactions) {
 
-                final String emote = reactionEmote.isEmote() ? ":" + reactionEmote.getEmote().getName() + ":" : MessageUtils.formatEmoteMessage(new ArrayList<>(), reactionEmote.getEmoji());
-                String outMsg = Configuration.instance().localization.reactionMessage.replace("%name%", member.getEffectiveName()).replace("%name2%", member.getUser().getAsTag()).replace("%emote%", emote);
-                if (Configuration.instance().localization.reactionMessage.contains("%msg%"))
+                final String emote = ":"+ reactionEmote.getName() + ":";// ? ":" + reactionEmote.getEmote().getName() + ":" : MessageUtils.formatEmoteMessage(new ArrayList<>(), reactionEmote.getEmoji());
+                String outMsg = Localization.instance().reactionMessage.replace("%name%", member.getEffectiveName()).replace("%name2%", member.getUser().getAsTag()).replace("%emote%", emote);
+                if (Localization.instance().reactionMessage.contains("%msg%"))
                     retrieveMessage.submit().thenAccept((m) -> {
                         String outMsg2 = outMsg.replace("%msg%", m.getContentDisplay());
-                        sendReactionMCMessage(p, MessageUtils.formatEmoteMessage(m.getEmotes(), outMsg2));
+                        sendReactionMCMessage(p, MessageUtils.formatEmoteMessage(m.getMentions().getCustomEmojis(), outMsg2));
                     });
                 else sendReactionMCMessage(p, outMsg);
             }
@@ -132,7 +134,7 @@ public class FabricServerInterface extends ServerInterface {
     public void sendMCMessage(String msg, UUID player) {
         final ServerPlayerEntity p = server.getPlayerManager().getPlayer(player);
         if (p != null)
-            p.sendMessage( Text.of(msg), MessageType.CHAT,Util.NIL_UUID);
+            p.sendMessage( Text.of(msg));
     }
 
     @Override

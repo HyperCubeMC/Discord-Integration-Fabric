@@ -4,6 +4,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import de.erdbeerbaerlp.dcintegration.common.addon.AddonLoader;
 import de.erdbeerbaerlp.dcintegration.common.storage.Configuration;
+import de.erdbeerbaerlp.dcintegration.common.storage.Localization;
 import de.erdbeerbaerlp.dcintegration.common.storage.PlayerLinkController;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
@@ -18,7 +19,7 @@ public class McCommandDiscord {
     public McCommandDiscord(CommandDispatcher<ServerCommandSource> dispatcher) {
         final LiteralArgumentBuilder<ServerCommandSource> l = CommandManager.literal("discord");
         if (Configuration.instance().ingameCommand.enabled) l.executes((ctx) -> {
-            ctx.getSource().sendFeedback(Texts.setStyleIfAbsent(new LiteralText(Configuration.instance().ingameCommand.message),
+            ctx.getSource().sendFeedback(Texts.setStyleIfAbsent(Text.literal(Configuration.instance().ingameCommand.message),
                     Style.EMPTY.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(Configuration.instance().ingameCommand.hoverMessage)))
                             .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, Configuration.instance().ingameCommand.inviteURL))), false);
             return 0;
@@ -33,18 +34,18 @@ public class McCommandDiscord {
             return 0;
         })).then(CommandManager.literal("ignore").executes((ctx) -> {
             ctx.getSource().sendFeedback(
-                    Text.of(discord_instance.togglePlayerIgnore(ctx.getSource().getPlayer().getUuid()) ? Configuration.instance().localization.commands.commandIgnore_unignore : Configuration.instance().localization.commands.commandIgnore_ignore), true);
+                    Text.of(discord_instance.togglePlayerIgnore(ctx.getSource().getPlayer().getUuid()) ? Localization.instance().commands.commandIgnore_unignore : Localization.instance().commands.commandIgnore_ignore), true);
             return 0;
         })).then(CommandManager.literal("link").executes((ctx) -> {
             if (Configuration.instance().linking.enableLinking && discord_instance.srv.isOnlineMode() && !Configuration.instance().linking.whitelistMode) {
                 if (PlayerLinkController.isPlayerLinked(ctx.getSource().getPlayer().getUuid())) {
-                    ctx.getSource().sendFeedback(Text.of(Formatting.RED + Configuration.instance().localization.linking.alreadyLinked.replace("%player%", discord_instance.getJDA().getUserById(PlayerLinkController.getDiscordFromBedrockPlayer(ctx.getSource().getPlayer().getUuid())).getAsTag())), false);
+                    ctx.getSource().sendFeedback(Text.of(Formatting.RED + Localization.instance().linking.alreadyLinked.replace("%player%", discord_instance.getJDA().getUserById(PlayerLinkController.getDiscordFromBedrockPlayer(ctx.getSource().getPlayer().getUuid())).getAsTag())), false);
                     return 0;
                 }
                 final int r = discord_instance.genLinkNumber(ctx.getSource().getPlayer().getUuid());
-                ctx.getSource().sendFeedback(Texts.setStyleIfAbsent(new LiteralText(Configuration.instance().localization.linking.linkMsgIngame.replace("%num%", r + "").replace("%prefix%", "/")), Style.EMPTY.withFormatting(Formatting.AQUA).withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, "" + r)).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new LiteralText(Configuration.instance().localization.linking.hoverMsg_copyClipboard)))), false);
+                ctx.getSource().sendFeedback(Texts.setStyleIfAbsent(Text.literal(Localization.instance().linking.linkMsgIngame.replace("%num%", r + "").replace("%prefix%", "/")), Style.EMPTY.withFormatting(Formatting.AQUA).withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, "" + r)).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal(Localization.instance().linking.hoverMsg_copyClipboard)))), false);
             } else {
-                ctx.getSource().sendFeedback(Text.of(Formatting.RED + Configuration.instance().localization.commands.subcommandDisabled), false);
+                ctx.getSource().sendFeedback(Text.of(Formatting.RED + Localization.instance().commands.subcommandDisabled), false);
             }
             return 0;
         })).then(CommandManager.literal("stop").requires((p) -> p.hasPermissionLevel(4)).executes((ctx) -> {
@@ -55,11 +56,11 @@ public class McCommandDiscord {
             try {
                 Configuration.instance().loadConfig();
             } catch (IOException e) {
-                ctx.getSource().sendFeedback(Texts.setStyleIfAbsent(new LiteralText(e.getMessage()),Style.EMPTY.withFormatting(Formatting.RED)),true);
+                ctx.getSource().sendFeedback(Texts.setStyleIfAbsent(Text.literal(e.getMessage()),Style.EMPTY.withFormatting(Formatting.RED)),true);
                 e.printStackTrace();
             }
             AddonLoader.reloadAll();
-            ctx.getSource().sendFeedback(Text.of(Configuration.instance().localization.commands.configReloaded), true);
+            ctx.getSource().sendFeedback(Text.of(Localization.instance().commands.configReloaded), true);
             return 0;
         }));
         dispatcher.register(l);
