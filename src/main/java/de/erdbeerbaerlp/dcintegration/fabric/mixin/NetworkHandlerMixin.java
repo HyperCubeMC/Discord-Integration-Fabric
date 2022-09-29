@@ -77,7 +77,8 @@ public class NetworkHandlerMixin {
             discord_instance.sendMessage(Localization.instance().playerLeave.replace("%player%", FabricMessageUtils.formatPlayerName(player)));
         else if (discord_instance != null && DiscordIntegration.timeouts.contains(player.getUuid())) {
             discord_instance.sendMessage(Localization.instance().playerTimeout.replace("%player%", FabricMessageUtils.formatPlayerName(player)));
-            DiscordIntegration.timeouts.remove(player.getUuid());
+            // Fix for buggy timeouts causing leftovers in the timeout list
+            DiscordIntegration.timeouts.removeIf(uuid -> uuid.equals(player.getUuid()));
         }
     }
 }
